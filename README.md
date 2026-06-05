@@ -1,63 +1,267 @@
-Resemblyzer allows you to derive a **high-level representation of a voice** through a deep learning model (referred to as the voice encoder). Given an audio file of speech, it creates a summary vector of 256 values (an embedding, often shortened to "embed" in this repo) that summarizes the characteristics of the voice spoken. 
+# Voice Comparison Tool — A Resemblyzer-Based Analysis System
 
-N.B.: this repo holds 100mb of audio data for demonstration purpose. To get [the package](https://pypi.org/project/Resemblyzer/) alone, run `pip install resemblyzer` (python 3.5+ is required).
+> A modern, optimized **GUI application** for voice similarity analysis and speaker verification using deep learning voice embeddings.
 
-## Demos
-**Speaker diarization**: [\[Demo 02\]](https://github.com/resemble-ai/Resemblyzer/blob/master/demo02_diarization.py) recognize who is talking when with only a few seconds of reference audio per speaker:  
-*(click the image for a video)*
+This is a **personal project built on top of Resemblyzer** (voice encoder by Resemble AI) that provides an intuitive desktop interface for comparing and analyzing voice recordings in real-time. It combines the power of pretrained neural voice encodings with an interactive visualization dashboard.
 
-[![demo_02](https://i.imgur.com/2MpNauG.png)](https://streamable.com/uef39)
+---
 
-**Fake speech detection**: [\[Demo 05\]](https://github.com/resemble-ai/Resemblyzer/blob/master/demo05_fake_speech_detection.py) modest detection of fake speech by comparing the similarity of 12 unknown utterances (6 real ones, 6 fakes) against ground truth reference audio. Scores above the dashed line are predicted as real, so the model makes one error here.
+## 🎯 What This Project Does
 
-![demo_05](plots/fake_speech_detection.png?raw=true)
+This tool enables you to:
 
-For reference, [this](https://www.youtube.com/watch?v=Ho9h0ouemWQ) is the fake video that achieved a high score.
+- **Compare multiple voice recordings** and compute similarity scores between them
+- **Verify speaker identity** by comparing new audio against a reference voice profile
+- **Visualize voice embeddings** in 2D space using UMAP dimensionality reduction
+- **Convert any audio/video format** automatically (MP3, MP4, M4A, MOV, FLAC → 16kHz mono WAV)
+- **Cache conversion results** to avoid redundant processing
+- **Export results** as CSV (similarity scores + UMAP coordinates) and PNG plots
+- **Analyze speaker similarity** across batches of files with confidence scoring
 
-**Visualizing the manifold**:  
-[\[Demo 03 - left\]](https://github.com/resemble-ai/Resemblyzer/blob/master/demo03_projection.py) projecting the embeddings of 100 utterances (10 each from 10 speakers) in 2D space. The utterances from the same speakers form a tight cluster. With a trivial clustering algorithm, the speaker verification error rate for this example (with data unseen in training) would be 0%.  
-[\[Demo 04 - right\]](https://github.com/resemble-ai/Resemblyzer/blob/master/demo04_clustering.py) same as demo 03 but with 251 embeddings all from distinct speakers, highlighting that the model has learned on its own to identify the sex of the speaker.
+### Key Features
 
-![demo_03_04](plots/all_clustering.png?raw=true)
+✅ **Universal Audio Support** — Accepts MP3, MP4, M4A, MOV, FLAC, WAV via automatic ffmpeg conversion  
+✅ **Smart Caching** — Tracks converted files by hash to avoid re-processing  
+✅ **Deep Learning Embeddings** — Uses Resemblyzer's 256-D d-vector voice encoder  
+✅ **Interactive GUI** — Built with Tkinter for cross-platform compatibility  
+✅ **UMAP Visualization** — 2D projection of voice embeddings clustered by speaker similarity  
+✅ **Batch Processing** — Compare multiple voices simultaneously with reference-based similarity scoring  
+✅ **Export Functionality** — Save results as CSV + PNG for further analysis  
+✅ **Multi-threaded** — Long operations run in background without freezing UI  
 
-**Cross-similarity**: [\[Demo 01\]](https://github.com/resemble-ai/Resemblyzer/blob/master/demo01_similarity.py) comparing 10 utterances from 10 speakers against 10 other utterances from the same speakers.
+---
 
-![demo_01](plots/sim_matrix_1.png?raw=true)
+## 🚀 Quick Start
 
+### Prerequisites
+- **Python 3.10+** (officially tested with 3.10)
+- **FFmpeg** (for audio format conversion) — [Download here](https://ffmpeg.org/download.html)
+- **PyTorch** (CPU or GPU)
 
+### Installation
 
-## What can I do with this package?
-Resemblyzer has many uses:
-- **Voice similarity metric**: compare different voices and get a value on how similar they sound. This leads to other applications:
-  - **Speaker verification**: create a voice profile for a person from a few seconds of speech (5s - 30s) and compare it to that of new audio. Reject similarity scores below a threshold.
-  - **Speaker diarization**: figure out who is talking when by comparing voice profiles with the continuous embedding of a multispeaker speech segment.
-  - **Fake speech detection**: verify if some speech is legitimate or fake by comparing the similarity of possible fake speech to real speech.
-- **High-level feature extraction**: you can use the embeddings generated as feature vectors for machine learning or data analysis. This also leads to other applications:
-  - **Voice cloning**: see [this other project](https://github.com/CorentinJ/Real-Time-Voice-Cloning).
-  - **Component analysis**: figure out accents, tones, prosody, gender, ... through a component analysis of the embeddings.
-  - **Virtual voices**: create entirely new voice embeddings by sampling from a prior distribution.
-- **Loss function**: you can backpropagate through the voice encoder model and use it as a perceptual loss for your deep learning model! The voice encoder is written in PyTorch.
+1. **Clone this repository**
+   ```bash
+   cd C:\Users\[YourUsername]\Desktop
+   git clone https://github.com/resemble-ai/Resemblyzer.git Resemblyzer_clone
+   cd Resemblyzer_clone
+   ```
 
-Resemblyzer is fast to execute (around 1000x real-time on a GTX 1080, with a minimum of 10ms for I/O operations), and can run both on CPU or GPU. It is robust to noise. It currently works best on English language only, but should still be able to perform somewhat decently on other languages.
+2. **Create a Python virtual environment**
+   ```bash
+   py -3.10 -m venv venv
+   .\venv\Scripts\activate
+   ```
 
+3. **Install dependencies**
+   ```bash
+   pip install torch resemblyzer pydub numpy umap-learn matplotlib sounddevice soundfile
+   ```
 
-## Code example
-This is a short example showing how to use Resemblyzer:
-```python
-from resemblyzer import VoiceEncoder, preprocess_wav
-from pathlib import Path
-import numpy as np
+4. **Create working directories**
+   ```bash
+   mkdir my_audio
+   mkdir plots
+   ```
 
-fpath = Path("path_to_an_audio_file")
-wav = preprocess_wav(fpath)
+5. **Launch the application**
+   ```bash
+   python voice_gui_optimized.py
+   ```
 
-encoder = VoiceEncoder()
-embed = encoder.embed_utterance(wav)
-np.set_printoptions(precision=3, suppress=True)
-print(embed)
+> 💡 **Alternative (Fast Setup):** See the interactive HTML simulator for a visual walkthrough:  
+> Open `resemblyzer_simulator.html` in your browser for installation guidance and live terminal simulation.
+
+---
+
+## 📖 How to Use the GUI
+
+### Main Window Layout
+
+| Component | Purpose |
+|-----------|---------|
+| **Add Audio Files** | Select multiple audio/video files to compare |
+| **Choose Reference Voice** | Pick a reference voice for similarity scoring |
+| **Clear List** | Reset the file list and reference voice |
+| **Run Comparison** | Execute embedding + similarity computation |
+| **Save CSV** | Export similarity scores and UMAP coordinates |
+| **Save PNG** | Save the 2D visualization plot as image |
+| **File Listbox** | View all selected audio files |
+| **Log Console** | Real-time processing status and scores |
+| **UMAP Plot** | 2D scatter plot of voice embeddings (auto-updating) |
+
+### Workflow Example
+
+1. Click **"Add Audio Files"** → Select 5-10 voice recordings
+2. Click **"Choose Reference Voice"** → Pick one voice to compare against
+3. Click **"Run Comparison"** → 
+   - Converts all files to 16kHz mono WAV (cached automatically)
+   - Loads the VoiceEncoder model (~250MB)
+   - Computes embeddings for each voice
+   - Calculates similarity scores to the reference voice
+   - Projects embeddings into 2D space with UMAP
+   - Displays interactive plot with labels
+4. Click **"Save CSV"** to export scores, or **"Save PNG"** to export the plot
+
+### Interpreting Results
+
+- **Similarity Score**: Range `[0.0, 1.0]`
+  - `> 0.7` = "Closer" (high speaker similarity)
+  - `≤ 0.7` = "Distant" (low speaker similarity)
+- **UMAP Plot**: Voices that cluster together have similar acoustic characteristics
+- **Reference Voice**: Marked in RED on the plot; all other voices in BLACK
+
+---
+
+## 🔧 Technical Details
+
+### Core Scripts
+
+| Script | Purpose |
+|--------|---------|
+| **`voice_gui_optimized.py`** | Main GUI application — Complete voice comparison dashboard |
+| **`demo_utils.py`** | Utility functions for plotting, audio playback, and visualization |
+| **`optimized_resemblyzer_cli.py`** | CLI interface for batch processing without GUI |
+| **`demo01_similarity.py`** | Standalone demo: Cross-similarity matrix generation |
+| **`demo02_diarization.py`** | Standalone demo: Speaker diarization (who is talking when) |
+| **`demo03_projection_mine.py`** | Standalone demo: Custom UMAP projection with speaker clustering |
+| **`demo05_fake_speech_detection.py`** | Standalone demo: Detect synthetic/fake speech |
+
+### Data Flow
+
+```
+Audio Files (MP3, MP4, etc.)
+    ↓
+[Convert to 16kHz mono WAV] ← Cached by file hash
+    ↓
+[Load VoiceEncoder Model]
+    ↓
+[Compute 256-D Embeddings]
+    ↓
+[Calculate Similarity Scores] ← Reference-based or pairwise
+    ↓
+[UMAP Projection to 2D]
+    ↓
+[Visualize + Export CSV/PNG]
 ```
 
-I highly suggest giving a peek to the demos to understand how similarity is computed and to see practical usages of the voice encoder.
+### File Conversion & Caching
 
-## Additional info
-Resemblyzer emerged as a side project of the [Real-Time Voice Cloning](https://github.com/CorentinJ/Real-Time-Voice-Cloning) repository. The pretrained model that comes with Resemblyzer is interchangeable with models trained in that repository, so feel free to finetune a model on new data and possibly new languages! The paper from which the voice encoder was implemented is [Generalized End-To-End Loss for Speaker Verification](https://arxiv.org/pdf/1710.10467.pdf) (in which it is called the *speaker* encoder).
+- **Cache File**: `conversion_cache.json` — Maps input file path + hash → output WAV path
+- **Work Directory**: `my_audio/` — Stores converted WAV files
+- **Plots Directory**: `plots/` — Stores CSV and PNG exports
+
+---
+
+## 📊 Demo Scripts
+
+Run any demo standalone for specific tasks:
+
+```bash
+# Cross-similarity matrix (compare multiple voices against each other)
+python demo01_similarity.py
+
+# Speaker diarization (determine who is talking in multi-speaker audio)
+python demo02_diarization.py
+
+# UMAP projection (visualize voice clusters)
+python demo03_projection_mine.py
+
+# Fake speech detection (identify synthetic/cloned voices)
+python demo05_fake_speech_detection.py
+```
+
+---
+
+## 📦 Dependencies
+
+| Package | Purpose |
+|---------|---------|
+| `resemblyzer` | Deep learning voice encoder (d-vector model) |
+| `torch` | PyTorch backend for neural networks |
+| `numpy` | Numerical computing |
+| `pandas` | Data wrangling + CSV export |
+| `matplotlib` | Plotting backend |
+| `umap-learn` | Dimensionality reduction (2D projection) |
+| `sounddevice` | Audio playback |
+| `soundfile` | Audio file I/O |
+| `pydub` | Audio format handling |
+
+---
+
+## 💾 Project Structure
+
+```
+661175VoiceComparison/
+├── voice_gui_optimized.py        # Main GUI application ⭐
+├── optimized_resemblyzer_cli.py  # CLI batch processing
+├── demo*.py                       # Standalone demo scripts
+├── demo_utils.py                 # Shared utilities
+├── resemblyzer_simulator.html    # Interactive setup guide 📖
+├── my_audio/                     # Working directory for audio files
+├── plots/                        # Output directory for CSV + PNG
+├── conversion_cache.json         # Cache of converted files
+├── requirements_demos.txt        # Full dependencies
+├── requirements_package.txt      # Minimal dependencies
+└── README.md                     # This file
+```
+
+---
+
+## 🎓 Background
+
+This project builds upon **Resemblyzer** by Resemble AI, which provides a pretrained neural voice encoder for:
+- **Speaker verification** — Verify if a person is who they claim to be
+- **Speaker diarization** — Determine who is speaking at any given time in multi-speaker audio
+- **Voice similarity** — Compute a numerical similarity metric between any two voices
+- **Fake speech detection** — Identify synthetic or cloned speech
+
+Original Resemblyzer: https://github.com/resemble-ai/Resemblyzer
+
+---
+
+## 📝 License
+
+This project adapts code from Resemblyzer (licensed under Apache 2.0). See LICENSE for details.
+
+---
+
+## 🤝 Contributing
+
+This is a personal academic/research project. Feel free to fork and adapt for your needs!
+
+### Future Enhancements
+- [ ] Real-time voice streaming comparison
+- [ ] Speaker enrollment/database building
+- [ ] Multi-language support
+- [ ] Advanced filtering (noise removal, normalization)
+- [ ] Web-based interface (FastAPI + React)
+
+---
+
+## ⚡ Troubleshooting
+
+### Issue: "ffmpeg not found"
+**Solution**: Install FFmpeg or place `ffmpeg.exe` in the project root directory.
+
+### Issue: "CUDA out of memory"
+**Solution**: The model will fall back to CPU. Ensure you have 8+ GB RAM available.
+
+### Issue: "ModuleNotFoundError: No module named 'resemblyzer'"
+**Solution**: Reinstall dependencies:
+```bash
+pip install --upgrade resemblyzer torch
+```
+
+### Issue: "Tkinter not available"
+**Solution**: On Linux, install: `sudo apt-get install python3-tk`
+
+---
+
+## 📧 Questions?
+
+Open an issue or refer to the original Resemblyzer documentation for more information about voice embeddings and the deep learning model.
+
+---
+
+**Happy voice analyzing!** 🎙️✨
